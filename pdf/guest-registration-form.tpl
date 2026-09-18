@@ -568,29 +568,7 @@
 	{/if}
 
 	{* ===== SECTION 10: FOR OFFICE USE ONLY ===== *}
-	{if $show_section_office_use}
-		<tr><td colspan="12" height="10">&nbsp;</td></tr>
-		<tr>
-			<td colspan="12">
-				<table class="bordered-table" width="100%" cellpadding="5" cellspacing="0" nobr="true">
-					<tbody>
-						<tr>
-							<td class="white">
-								<table width="100%" cellpadding="4" cellspacing="0">
-									{if $labels.staff_name || $labels.office_checkin_time}
-									<tr>
-										{if $labels.staff_name && $labels.office_checkin_time}
-											<td width="20%" class="bold">{l s=$labels.staff_name pdf='true'}:</td>
-											<td width="30%" class="white">____________________</td>
-											<td width="20%" class="bold">{l s=$labels.office_checkin_time pdf='true'}:</td>
-											<td width="30%" class="white">____________________</td>
-										{elseif $labels.staff_name}
-											<td width="20%" class="bold">{l s=$labels.staff_name pdf='true'}:</td>
-											<td width="80%" colspan="3" class="white">____________________</td>
-										{else}
-											<td width="20%" class="bold">{l s=$labels.office_checkin_time pdf='true'}:</td>
-											<td width="80%" colspan="3" class="white">____________________</td>
-										{/if}
+
 									</tr>
 									{/if}
 									{if $labels.id_verified || $labels.reg_no}
