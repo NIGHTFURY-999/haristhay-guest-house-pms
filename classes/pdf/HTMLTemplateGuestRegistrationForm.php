@@ -149,10 +149,8 @@ class HTMLTemplateGuestRegistrationFormCore extends HTMLTemplate
         $section7  = HotelBookingDetail::GRC_SECTION_PAYMENT_DEPOSIT;
         $section8  = HotelBookingDetail::GRC_SECTION_GUEST_SIGNATURE;
         $section9  = HotelBookingDetail::GRC_SECTION_PROPERTY_REGS;
-        $section10 = HotelBookingDetail::GRC_SECTION_OFFICE_USE_ONLY;
 
         // $labels: false = field hidden, label string = field visible.
-        // Template uses {if $labels.key} for visibility AND {$labels.key} for label — no separate boolean assigns.
         $labels = array(
             // Section 1: Guest Information
             'title'        => $fieldLabels[$section1][HotelBookingDetail::GRC_GUEST_TITLE],
@@ -215,12 +213,6 @@ class HTMLTemplateGuestRegistrationFormCore extends HTMLTemplate
             'checkin_time'   => $fieldLabels[$section9][HotelBookingDetail::GRC_PROP_CHECKIN_CHECKOUT_TIME] ? 'Check-in Time'  : false,
             'checkout_time'  => $fieldLabels[$section9][HotelBookingDetail::GRC_PROP_CHECKIN_CHECKOUT_TIME] ? 'Check-out Time' : false,
             'hotel_policies' => $fieldLabels[$section9][HotelBookingDetail::GRC_PROP_HOTEL_POLICIES],
-
-            // Section 10: For Office Use Only
-            'staff_name'          => $fieldLabels[$section10][HotelBookingDetail::GRC_OFFICE_STAFF_NAME],
-            'office_checkin_time' => $fieldLabels[$section10][HotelBookingDetail::GRC_OFFICE_CHECKIN_TIME],
-            'id_verified'         => $fieldLabels[$section10][HotelBookingDetail::GRC_OFFICE_ID_VERIFIED],
-            'reg_no'              => $fieldLabels[$section10][HotelBookingDetail::GRC_OFFICE_REG_NO],
         );
 
         $showLocalIdGroup = (bool)$labels['id_proof'] || (bool)$labels['id_number'];
@@ -252,7 +244,6 @@ class HTMLTemplateGuestRegistrationFormCore extends HTMLTemplate
             'show_section_payment_deposit'   => !empty(array_filter($fieldLabels[$section7])),
             'show_section_guest_signature'   => !empty(array_filter($fieldLabels[$section8])),
             'show_section_property_regs'     => !empty(array_filter($fieldLabels[$section9])),
-            'show_section_office_use'        => !empty(array_filter($fieldLabels[$section10])),
 
             'section_additional_guests' => $grcInfo[$section5]['name'],
             'section_property_regs'     => $grcInfo[$section9]['name'],
@@ -290,3 +281,5 @@ class HTMLTemplateGuestRegistrationFormCore extends HTMLTemplate
         return $filename.'.pdf';
     }
 }
+
+
