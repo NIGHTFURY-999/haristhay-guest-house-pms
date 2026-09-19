@@ -486,6 +486,7 @@ class HotelReservationSystem extends Module
         $this->installTab('AdminOrderRefundRules', 'Manage Order Refund Rules', 'AdminHotelReservationSystemManagement');
         $this->installTab('AdminOrderRefundRequests', 'Manage Order Refund Requests', 'AdminHotelReservationSystemManagement');
 
+        $this->installTab('AdminOnlineCheckin', 'Online Check-In', 'AdminHotelReservationSystemManagement');
         $this->installTab('AdminHotelConfigurationSetting', 'General Settings', 'AdminHotelReservationSystemManagement');
         // parented under core Orders, next to the existing "Statuses" tab — same idea, for room statuses
         $this->installTab('AdminRoomStatuses', 'Room Statuses', 'AdminParentOrders');
@@ -529,6 +530,69 @@ class HotelReservationSystem extends Module
         return $res;
     }
 
+    public function generateOnlineCheckinToken($idHtlBooking, $idCustomer, $expiryTimestamp)
+    {
+        $token = bin2hex(random_bytes(32));
+        $tokenHash = hash('sha256', $token);
+
+        $now = date('Y-m-d H:i:s');
+        $expiry = date('Y-m-d H:i:s', (int) $expiryTimestamp);
+
+        $existingId = (int) Db::getInstance()->getValue(
+            'SELECT `id_online_checkin`
+             FROM `'._DB_PREFIX_.'htl_online_checkin`
+             WHERE `id_htl_booking` = '.(int) $idHtlBooking.'
+             ORDER BY `id_online_checkin` DESC
+             LIMIT 1'
+        );
+
+        if ($existingId) {
+            $sql = 'UPDATE `'._DB_PREFIX_.'htl_online_checkin`
+                    SET `id_customer` = '.(int) $idCustomer.',
+                        `status` = "pending",
+                        `checkin_token_hash` = "'.pSQL($tokenHash).'",
+                        `token_expires_at` = "'.pSQL($expiry).'",
+                        `date_upd` = "'.pSQL($now).'"
+                    WHERE `id_online_checkin` = '.(int) $existingId;
+        } else {
+            $sql = 'INSERT INTO `'._DB_PREFIX_.'htl_online_checkin`
+                    (`id_htl_booking`, `id_customer`, `status`, `checkin_token_hash`, `token_expires_at`, `date_add`, `date_upd`)
+                    VALUES (
+                        '.(int) $idHtlBooking.',
+                        '.(int) $idCustomer.',
+                        "pending",
+                        "'.pSQL($tokenHash).'",
+                        "'.pSQL($expiry).'",
+                        "'.pSQL($now).'",
+                        "'.pSQL($now).'"
+                    )';
+        }
+
+        if (!Db::getInstance()->execute($sql)) {
+            return false;
+        }
+
+        return $token;
+    }
+    public function getOnlineCheckinUrl($idHtlBooking, $idCustomer, $expiryTimestamp)
+    {
+        $token = $this->generateOnlineCheckinToken(
+            $idHtlBooking,
+            $idCustomer,
+            $expiryTimestamp
+        );
+
+        if (!$token) {
+            return false;
+        }
+
+        return $this->context->link->getModuleLink(
+            $this->name,
+            'onlinecheckin',
+            array('token' => $token),
+            true
+        );
+    }
     public function install()
     {
         $objModuleDb = new HotelReservationSystemDb();
