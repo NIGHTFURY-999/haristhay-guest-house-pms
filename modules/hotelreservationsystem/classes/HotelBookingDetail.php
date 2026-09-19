@@ -3214,22 +3214,6 @@ class HotelBookingDetail extends ObjectModel
                     break;
                 }
             }
-            $channelOrderPayment = new ChannelOrderPayment();
-            $total_amount = (float)$context->cart->getOrderTotal(true, Cart::BOTH);
-            //$this->module = Module::getInstanceByName('hotelreservationsystem');
-            $orderCreated = $channelOrderPayment->validateOrder((int) $context->cart->id, (int) 2, (float) $total_amount, 'Channel Manager Booking', null, array(), null, false, $context->cart->secure_key);
-            if ($orderCreated) {
-                $idOrder = Order::getOrderByCartId($context->cart->id);
-                $order = new Order($idOrder);
-                $order->source = 'Channel Manager Booking';
-                if ($idOrder) {
-                    return $idOrder;
-                } else {
-                    return false;
-                }
-            } else {
-                return false;
-            }
         }
     }
 
