@@ -525,6 +525,7 @@ class HotelReservationSystem extends Module
         $this->installTab('AdminOrderRefundRequests', 'Manage Order Refund Requests', 'AdminHotelReservationSystemManagement');
 
         $this->installTab('AdminOnlineCheckin', 'Online Check-In', 'AdminHotelReservationSystemManagement');
+        $this->installTab('AdminWifiCredential', 'Wi-Fi Management', 'AdminHotelReservationSystemManagement');
         $this->installTab('AdminHotelConfigurationSetting', 'General Settings', 'AdminHotelReservationSystemManagement');
         // parented under core Orders, next to the existing "Statuses" tab — same idea, for room statuses
         $this->installTab('AdminRoomStatuses', 'Room Statuses', 'AdminParentOrders');
