@@ -429,6 +429,44 @@ class HotelReservationSystem extends Module
         }
     }
 
+    public function hookActionBookingStatusAfter($params)
+    {
+        if (!isset($params['object']) || !Validate::isLoadedObject($params['object'])) {
+            return;
+        }
+
+        $booking = $params['object'];
+        $newStatus = isset($params['id_status_to']) ? (int) $params['id_status_to'] : 0;
+
+        if ($newStatus == HotelBookingDetail::STATUS_CHECKED_IN) {
+            $existingCredential = HotelWifiCredential::getActiveByBooking($booking->id);
+
+            if ($existingCredential) {
+                return;
+            }
+
+            $credentialData = HotelWifiCredential::createForBooking(
+                $booking->id,
+                $booking->id_customer,
+                $booking->id_room
+            );
+
+            if ($credentialData) {
+                $expiresAt = !empty($booking->date_to)
+                    ? date('Y-m-d H:i:s', strtotime($booking->date_to))
+                    : date('Y-m-d H:i:s', strtotime('+1 day'));
+
+                $credential = new HotelWifiCredential($credentialData['id_wifi_credential']);
+
+                if (Validate::isLoadedObject($credential)) {
+                    $credential->activate($expiresAt);
+                }
+            }
+        } elseif ($newStatus == HotelBookingDetail::STATUS_CHECKED_OUT) {
+            HotelWifiCredential::expireByBooking($booking->id);
+        }
+    }
+
     public function hookDisplayBackOfficeHeader()
     {
         $this->context->controller->addCSS($this->_path.'views/css/admin/css/hotel_admin_tab_logo.css');
@@ -637,6 +675,7 @@ class HotelReservationSystem extends Module
                 'actionObjectProfileDeleteBefore',
                 'actionObjectGroupDeleteBefore',
                 'actionOrderStatusPostUpdate',
+                'actionBookingStatusAfter',
                 'displayLeftColumn',
                 'actionCartSummary',
                 'actionFrontControllerSetMedia',

@@ -600,6 +600,28 @@ class HotelReservationSystemDb
             `date_upd` datetime NOT NULL,
             PRIMARY KEY (`id_online_checkin_guest`),
             KEY `idx_id_online_checkin` (`id_online_checkin`)
+            ) ENGINE="._MYSQL_ENGINE_." DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;",
+
+        "CREATE TABLE IF NOT EXISTS `"._DB_PREFIX_."htl_wifi_credential` (
+            `id_wifi_credential` int(11) NOT NULL AUTO_INCREMENT,
+            `id_htl_booking` int(11) NOT NULL,
+            `id_customer` int(11) NOT NULL,
+            `id_room` int(11) DEFAULT NULL,
+            `username` varchar(128) NOT NULL,
+            `password_hash` varchar(255) NOT NULL,
+            `status` varchar(32) NOT NULL DEFAULT 'pending',
+            `activated_at` datetime DEFAULT NULL,
+            `expires_at` datetime DEFAULT NULL,
+            `revoked_at` datetime DEFAULT NULL,
+            `date_add` datetime NOT NULL,
+            `date_upd` datetime NOT NULL,
+            PRIMARY KEY (`id_wifi_credential`),
+            UNIQUE KEY `uniq_username` (`username`),
+            KEY `idx_id_htl_booking` (`id_htl_booking`),
+            KEY `idx_id_customer` (`id_customer`),
+            KEY `idx_id_room` (`id_room`),
+            KEY `idx_status` (`status`),
+            KEY `idx_expires_at` (`expires_at`)
         ) ENGINE="._MYSQL_ENGINE_." DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;",
             "CREATE TABLE IF NOT EXISTS `"._DB_PREFIX_."htl_connected_room` (
                 `id_connected_room` int(11) NOT NULL AUTO_INCREMENT,
