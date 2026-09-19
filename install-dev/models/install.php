@@ -721,7 +721,6 @@ class InstallModelInstall extends InstallAbstractModel
                 'qlostatsserviceproducts',
                 'blockcart',
                 'blockuserinfo',
-                'qlochannelmanagerconnector',
             );
         }
         return $modules;
