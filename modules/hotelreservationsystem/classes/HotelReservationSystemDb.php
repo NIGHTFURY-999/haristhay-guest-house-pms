@@ -267,6 +267,7 @@ class HotelReservationSystemDb
             "CREATE TABLE IF NOT EXISTS `"._DB_PREFIX_."htl_booking_document` (
                 `id_htl_booking_document` int(11) NOT NULL AUTO_INCREMENT,
                 `id_htl_booking` int(11) NOT NULL,
+                `id_online_checkin` int(11) DEFAULT NULL,
                 `title` varchar(32) NOT NULL DEFAULT '',
                 `file_type` tinyint(1) NOT NULL DEFAULT '0',
                 `file_name` varchar(8) NOT NULL DEFAULT '',

@@ -256,3 +256,8 @@ admin/themes/default/css/screen.css
 
 **sitemap.xml
 robots.txt
+qloapps-backup.sql
+
+docker/mysql/*.sql
+
+.env
