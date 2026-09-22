@@ -33,7 +33,7 @@ class HotelReservationSystem extends Module
     {
         $this->name = 'hotelreservationsystem';
         $this->tab = 'administration';
-        $this->version = '1.7.1';
+        $this->version = '1.7.3';
         $this->author = 'Webkul';
         $this->need_instance = 0;
         $this->bootstrap = true;
@@ -427,6 +427,69 @@ class HotelReservationSystem extends Module
         ) {
             $objHtlBkDtl->resolveOverBookings();
         }
+        // Generate Online Check-In credentials when payment is complete
+        if (isset($params['newOrderStatus']->id)
+            && (int) $params['newOrderStatus']->id === 2
+            && isset($params['id_order'])
+            && (int) $params['id_order'] > 0
+        ) {
+            $idOrder = (int) $params['id_order'];
+            $bookingRows = $objHtlBkDtl->getBookingDataByOrderId($idOrder);
+            if ($bookingRows) {
+                foreach ($bookingRows as $bookingRow) {
+                    $idBooking = (int) $bookingRow['id'];
+                    $idCustomer = (int) $bookingRow['id_customer'];
+
+                    $dateTo = !empty($bookingRow['date_to'])
+                        ? strtotime($bookingRow['date_to'])
+                        : strtotime('+1 day');
+
+                    $token = $this->generateOnlineCheckinToken(
+                        $idBooking,
+                        $idCustomer,
+                        $dateTo
+                    );
+
+                }
+            }
+        }
+    }
+    public function hookActionBookingStatusAfter($params)
+    {
+        if (!isset($params['object']) || !Validate::isLoadedObject($params['object'])) {
+            return;
+        }
+
+        $booking = $params['object'];
+        $newStatus = isset($params['id_status_to']) ? (int) $params['id_status_to'] : 0;
+
+        if ($newStatus == HotelBookingDetail::STATUS_CHECKED_IN) {
+            $existingCredential = HotelWifiCredential::getActiveByBooking($booking->id);
+
+            if ($existingCredential) {
+                return;
+            }
+
+            $credentialData = HotelWifiCredential::createForBooking(
+                $booking->id,
+                $booking->id_customer,
+                $booking->id_room
+            );
+
+            if ($credentialData) {
+                $expiresAt = !empty($booking->date_to)
+                    ? date('Y-m-d H:i:s', strtotime($booking->date_to))
+                    : date('Y-m-d H:i:s', strtotime('+1 day'));
+
+                $credential = new HotelWifiCredential($credentialData['id_wifi_credential']);
+
+                if (Validate::isLoadedObject($credential)) {
+                    $credential->activate($expiresAt);
+                }
+            }
+        } elseif ($newStatus == HotelBookingDetail::STATUS_CHECKED_OUT) {
+            HotelWifiCredential::expireByBooking($booking->id);
+        }
     }
 
     public function hookActionBookingStatusAfter($params)
@@ -577,14 +640,13 @@ class HotelReservationSystem extends Module
         $now = date('Y-m-d H:i:s');
         $expiry = date('Y-m-d H:i:s', (int) $expiryTimestamp);
 
-        $existingId = (int) Db::getInstance()->getValue(
+        $existingRow = Db::getInstance()->getRow(
             'SELECT `id_online_checkin`
              FROM `'._DB_PREFIX_.'htl_online_checkin`
              WHERE `id_htl_booking` = '.(int) $idHtlBooking.'
-             ORDER BY `id_online_checkin` DESC
-             LIMIT 1'
+             ORDER BY `id_online_checkin` DESC'
         );
-
+        $existingId = $existingRow ? (int) $existingRow['id_online_checkin'] : 0;
         if ($existingId) {
             $sql = 'UPDATE `'._DB_PREFIX_.'htl_online_checkin`
                     SET `id_customer` = '.(int) $idCustomer.',

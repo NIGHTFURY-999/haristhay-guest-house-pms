@@ -26,12 +26,13 @@ class HotelReservationSystemOnlineCheckinModuleFrontController extends ModuleFro
 
         $tokenHash = hash('sha256', $token);
 
-        $checkin = Db::getInstance()->getRow(
+        $checkins = Db::getInstance()->executeS(
             'SELECT *
              FROM `'._DB_PREFIX_.'htl_online_checkin`
-             WHERE `checkin_token_hash` = "'.pSQL($tokenHash).'"
-             LIMIT 1'
+             WHERE `checkin_token_hash` = "'.pSQL($tokenHash).'"'
         );
+
+        $checkin = !empty($checkins) ? $checkins[0] : false;
 
         if (!$checkin) {
             $this->renderError('This check-in link is invalid or has expired.');
@@ -73,7 +74,7 @@ class HotelReservationSystemOnlineCheckinModuleFrontController extends ModuleFro
         ));
 
         $this->setTemplate(
-            'module:hotelreservationsystem/views/templates/front/onlinecheckin.tpl'
+            'onlinecheckin.tpl'
         );
     }
 
@@ -159,6 +160,9 @@ class HotelReservationSystemOnlineCheckinModuleFrontController extends ModuleFro
         $customerAddress->city = $city;
         $customerAddress->postcode = $postalCode;
         $customerAddress->phone_mobile = $phone;
+        if (empty($customerAddress->id_country)) {
+            $customerAddress->id_country = (int) Configuration::get('PS_COUNTRY_DEFAULT');
+        }
         $customerAddress->alias = 'Online Check-In';
 
         if (!$customerAddress->id) {
@@ -279,6 +283,7 @@ class HotelReservationSystemOnlineCheckinModuleFrontController extends ModuleFro
 
         $document = new HotelBookingDocument();
         $document->id_htl_booking = $idBooking;
+        $document->id_online_checkin = $idCheckin;
         $document->title = 'Guest Identification Document';
         $document->setFileInfoForUploadedDocument('id_document');
         $document->setFileType();
@@ -349,8 +354,6 @@ class HotelReservationSystemOnlineCheckinModuleFrontController extends ModuleFro
             $message
         );
 
-        $this->setTemplate(
-            'module:hotelreservationsystem/views/templates/front/onlinecheckin-error.tpl'
-        );
+        $this->setTemplate('onlinecheckin-error.tpl');
     }
 }

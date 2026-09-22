@@ -29,6 +29,7 @@ class HotelBookingDocument extends ObjectModel
     public $file_type;
     public $file_name;
     public $date_add;
+    public $id_online_checkin;
 
     const FILE_TYPE_IMAGE = 1;
     const FILE_TYPE_PDF = 2;
@@ -42,6 +43,7 @@ class HotelBookingDocument extends ObjectModel
         'primary' => 'id_htl_booking_document',
         'fields' => array(
             'id_htl_booking' => array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId', 'required' => true),
+            'id_online_checkin' => array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId', 'required' => false),
             'title' => array('type' => self::TYPE_STRING, 'validate' => 'isCatalogName'),
             'file_type' => array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId', 'required' => true),
             'file_name' => array('type' => self::TYPE_STRING, 'validate' => 'isString'),

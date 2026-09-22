@@ -185,7 +185,7 @@
                             <td>
                                 <a
                                     class="btn btn-default"
-                                    href="{$link->getAdminLink('AdminBookingDocument')|escape:'html':'UTF-8'}&id_document={$document.id_htl_booking_document|intval}&is_preview=1"
+                                    href="{$link->getAdminLink('AdminBookingDocument')|escape:'html':'UTF-8'}&id_document={$document.id_htl_booking_document|intval}&is_preview=1&action=get_document"
                                     target="_blank"
                                 >
                                     <i class="icon-eye"></i>
@@ -259,6 +259,17 @@
 
         <form method="post" class="form-horizontal">
             <input type="hidden" name="id_online_checkin" value="{$checkin.id_online_checkin|intval}" />
+            <div class="form-group">
+                <label class="control-label col-lg-3">
+                    {l s='Identity Verification'}
+                </label>
+                <div class="col-lg-9">
+                    <label>
+                        <input type="checkbox" name="identity_verified" value="1" />
+                        {l s='I have manually verified the guest identity document and the submitted details.'}
+                    </label>
+                </div>
+            </div>
 
             <div class="form-group">
                 <label class="control-label col-lg-3">{l s='Rejection Reason'}</label>

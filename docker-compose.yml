@@ -1,0 +1,46 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: haristhay-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "3307:3306"
+    volumes:
+      - haristhay_mysql_data:/var/lib/mysql
+
+  mysql-init:
+    image: mysql:8.0
+    container_name: haristhay-mysql-init
+    depends_on:
+      - mysql
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        until mysqladmin ping -h mysql -u root -pharisthay_root --silent; do
+          sleep 2
+        done
+        mysql -h mysql -u root -pharisthay_root --binary-mode=1 qloapps < /backup/qloapps-backup.sql
+    volumes:
+      - ./docker/mysql/qloapps-backup-utf8.sql:/backup/qloapps-backup.sql:ro
+
+  web:
+    build:
+      context: .
+      dockerfile: ./docker/php/Dockerfile
+    container_name: haristhay-web
+    restart: unless-stopped
+    depends_on:
+      - mysql
+    ports:
+      - "8080:80"
+    volumes:
+      - ./:/var/www/html
+    working_dir: /var/www/html
+
+volumes:
+  haristhay_mysql_data:

@@ -53,7 +53,7 @@ class AdminOnlineCheckinController extends ModuleAdminController
         $customer = new Customer((int) $idCustomer);
 
         if (Validate::isLoadedObject($customer)) {
-            return $customer->firstname.' '.$customer->lastname;
+            return $customer->firstname . ' ' . $customer->lastname;
         }
 
         return $this->l('Unknown Guest');
@@ -73,6 +73,7 @@ class AdminOnlineCheckinController extends ModuleAdminController
         $idCheckin = (int) Tools::getValue('id_online_checkin');
         $action = Tools::getValue('review_action');
         $rejectionReason = trim((string) Tools::getValue('rejection_reason'));
+        $identityVerified = (bool) Tools::getValue('identity_verified');
 
         if (!$idCheckin) {
             $this->errors[] = $this->l('Invalid online check-in record.');
@@ -94,11 +95,15 @@ class AdminOnlineCheckinController extends ModuleAdminController
             $this->errors[] = $this->l('A rejection reason is required.');
             return;
         }
+        if ($action === 'approve' && !$identityVerified) {
+            $this->errors[] = $this->l('You must confirm that the guest identity document has been manually verified before approving.');
+            return;
+        }
 
         $checkin = Db::getInstance()->getRow(
             'SELECT `id_online_checkin`, `status`
-             FROM `'._DB_PREFIX_.'htl_online_checkin`
-             WHERE `id_online_checkin` = '.(int) $idCheckin
+             FROM `' . _DB_PREFIX_ . 'htl_online_checkin`
+             WHERE `id_online_checkin` = ' . (int) $idCheckin
         );
 
         if (!$checkin) {
@@ -122,7 +127,7 @@ class AdminOnlineCheckinController extends ModuleAdminController
                 'rejection_reason' => $action === 'reject' ? pSQL($rejectionReason, true) : '',
                 'date_upd' => date('Y-m-d H:i:s'),
             ),
-            'id_online_checkin = '.(int) $idCheckin
+            'id_online_checkin = ' . (int) $idCheckin
         );
 
         if (!$updated) {
@@ -132,8 +137,8 @@ class AdminOnlineCheckinController extends ModuleAdminController
 
         Tools::redirectAdmin(
             $this->context->link->getAdminLink('AdminOnlineCheckin')
-            .'&'.$this->identifier.'='.(int) $idCheckin
-            .'&conf=4'
+            . '&' . $this->identifier . '=' . (int) $idCheckin
+            . '&conf=4'
         );
     }
 
@@ -147,8 +152,8 @@ class AdminOnlineCheckinController extends ModuleAdminController
 
         $checkin = Db::getInstance()->getRow(
             'SELECT *
-             FROM `'._DB_PREFIX_.'htl_online_checkin`
-             WHERE `id_online_checkin` = '.(int) $idCheckin
+             FROM `' . _DB_PREFIX_ . 'htl_online_checkin`
+             WHERE `id_online_checkin` = ' . (int) $idCheckin
         );
 
         if (!$checkin) {
@@ -161,15 +166,15 @@ class AdminOnlineCheckinController extends ModuleAdminController
 
         $documents = Db::getInstance()->executeS(
             'SELECT *
-             FROM `'._DB_PREFIX_.'htl_booking_document`
-             WHERE `id_htl_booking` = '.(int) $checkin['id_htl_booking'].'
-             AND `id_online_checkin` = '.(int) $idCheckin
+             FROM `' . _DB_PREFIX_ . 'htl_booking_document`
+             WHERE `id_htl_booking` = ' . (int) $checkin['id_htl_booking'] . '
+             AND `id_online_checkin` = ' . (int) $idCheckin
         );
 
         $additionalGuests = Db::getInstance()->executeS(
             'SELECT *
-             FROM `'._DB_PREFIX_.'htl_online_checkin_guest`
-             WHERE `id_online_checkin` = '.(int) $idCheckin
+             FROM `' . _DB_PREFIX_ . 'htl_online_checkin_guest`
+             WHERE `id_online_checkin` = ' . (int) $idCheckin
         );
 
         $this->context->smarty->assign(array(
@@ -181,7 +186,7 @@ class AdminOnlineCheckinController extends ModuleAdminController
         ));
 
         return $this->context->smarty->fetch(
-            _PS_MODULE_DIR_.'hotelreservationsystem/views/templates/admin/onlinecheckin_view.tpl'
+            _PS_MODULE_DIR_ . 'hotelreservationsystem/views/templates/admin/onlinecheckin_view.tpl'
         );
     }
 }
